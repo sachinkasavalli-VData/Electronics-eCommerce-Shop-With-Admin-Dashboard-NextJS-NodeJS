@@ -9,6 +9,7 @@ import {
   formatCategoryName,
 } from "../../../../../utils/categoryFormating";
 import { nanoid } from "nanoid";
+import posthog from "posthog-js";
 import apiClient from "@/lib/api";
 
 interface DashboardProductDetailsProps {
@@ -41,6 +42,7 @@ const DashboardProductDetails = ({ params }: DashboardProductDetailsProps) => {
             throw Error("There was an error while deleting product");
           }
         } else {
+          posthog.capture("product_deleted", { product_id: id });
           toast.success("Product deleted successfully");
           router.push("/admin/products");
         }
@@ -68,6 +70,7 @@ const DashboardProductDetails = ({ params }: DashboardProductDetailsProps) => {
 
       if (response.status === 200) {
         await response.json();
+        posthog.capture("product_updated", { product_id: id });
         toast.success("Product successfully updated");
       } else {
         const errorData = await response.json();

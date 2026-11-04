@@ -11,6 +11,7 @@
 "use client";
 import { useProductStore } from "@/app/_zustand/store";
 import React from "react";
+import posthog from "posthog-js";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
@@ -30,6 +31,11 @@ const BuyNowSingleProductBtn = ({
       amount: quantityCount,
     });
     calculateTotals();
+    posthog.capture("buy_now_started", {
+      product_id: product?.id,
+      quantity: quantityCount,
+      unit_price: product?.price,
+    });
     toast.success("Product added to the cart");
     router.push("/checkout");
   };

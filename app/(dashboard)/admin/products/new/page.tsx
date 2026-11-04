@@ -5,6 +5,7 @@ import { convertCategoryNameToURLFriendly as convertSlugToURLFriendly } from "@/
 import { sanitizeFormData } from "@/lib/form-sanitize";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
+import posthog from "posthog-js";
 import toast from "react-hot-toast";
 
 const AddNewProduct = () => {
@@ -55,6 +56,12 @@ const AddNewProduct = () => {
       if (response.status === 201) {
         const data = await response.json();
         console.log("Product created successfully:", data);
+        posthog.capture("product_created", {
+          category_id: product.categoryId,
+          merchant_id: product.merchantId,
+          price: product.price,
+          in_stock: product.inStock,
+        });
         toast.success("Product added successfully");
         setProduct({
           merchantId: "",

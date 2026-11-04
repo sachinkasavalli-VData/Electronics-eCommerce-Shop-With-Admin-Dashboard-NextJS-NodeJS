@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import posthog from "posthog-js";
 import toast from "react-hot-toast";
 
 interface OrderProduct {
@@ -108,6 +109,10 @@ const AdminSingleOrder = () => {
       })
         .then((response) => {
           if (response.status === 200) {
+            posthog.capture("order_updated", {
+              order_id: order.id,
+              status: order.status,
+            });
             toast.success("Order updated successfuly");
           } else {
             throw Error("There was an error while updating a order");
@@ -129,11 +134,14 @@ const AdminSingleOrder = () => {
     apiClient.delete(
       `/api/order-product/${order?.id}`,
       requestOptions
-    ).then((response) => {
+    ).then((orderProductsResponse) => {
       apiClient.delete(
         `/api/orders/${order?.id}`,
         requestOptions
-      ).then((response) => {
+      ).then((orderResponse) => {
+        if (orderProductsResponse.ok && orderResponse.ok) {
+          posthog.capture("order_deleted", { order_id: order.id });
+        }
         toast.success("Order deleted successfully");
         router.push("/admin/orders");
       });

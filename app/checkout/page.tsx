@@ -4,6 +4,7 @@ import { useProductStore } from "../_zustand/store";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import posthog from "posthog-js";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import apiClient from "@/lib/api";
@@ -236,6 +237,10 @@ const CheckoutPage = () => {
       }
 
       console.log(" All products added successfully!");
+      posthog.capture("checkout_completed", {
+        item_count: products.length,
+        order_total: total,
+      });
 
       // Clear form and cart
       setCheckoutForm({

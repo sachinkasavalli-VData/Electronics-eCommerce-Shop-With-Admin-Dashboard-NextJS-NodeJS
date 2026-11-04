@@ -1,7 +1,9 @@
 import prisma from "@/utils/db";
 import bcrypt from "bcryptjs";
 import { nanoid } from "nanoid";
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
+import { SeverityNumber } from "@opentelemetry/api-logs";
+import { posthogLogger, posthogLoggerProvider } from "@/instrumentation";
 import { registrationSchema } from "@/utils/schema";
 import { sanitizeInput, commonValidations } from "@/utils/validation";
 import { handleApiError, AppError } from "@/utils/errorHandler";
@@ -26,6 +28,15 @@ export const POST = async (request: Request) => {
       throw validationResult.error;
     }
 
+    posthogLogger.emit({
+      body: "Account registration request validated",
+      severityNumber: SeverityNumber.INFO,
+      attributes: { route: "/api/register", outcome: "validated" },
+    });
+    after(async () => {
+      await posthogLoggerProvider.forceFlush();
+    });
+
     const { email, password } = validationResult.data;
 
     const existingUser = await prisma.user.findFirst({ 
@@ -46,6 +57,12 @@ export const POST = async (request: Request) => {
         password: hashedPassword,
         role: "user",
       },
+    });
+
+    posthogLogger.emit({
+      body: "Account registration completed",
+      severityNumber: SeverityNumber.INFO,
+      attributes: { route: "/api/register", outcome: "created" },
     });
 
     // Return success response without sensitive data

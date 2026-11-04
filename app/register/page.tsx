@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import posthog from "posthog-js";
 import toast from "react-hot-toast";
 
 const RegisterPage = () => {
@@ -64,6 +65,7 @@ const RegisterPage = () => {
 
       if (res.ok) {
         setError("");
+        posthog.capture("account_registered");
         toast.success("Registration successful");
         router.push("/login");
       } else {

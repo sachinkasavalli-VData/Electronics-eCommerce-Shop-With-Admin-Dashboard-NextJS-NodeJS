@@ -11,6 +11,7 @@
 "use client";
 import { ProductInCart, useProductStore } from "@/app/_zustand/store";
 import React, { useState } from "react";
+import posthog from "posthog-js";
 import { FaPlus } from "react-icons/fa6";
 import { FaMinus } from "react-icons/fa6";
 
@@ -23,12 +24,22 @@ const QuantityInputCart = ({ product } : { product: ProductInCart }) => {
       setQuantityCount(() => quantityCount + 1);
       updateCartAmount(product.id, quantityCount + 1);
       calculateTotals();
+      posthog.capture("cart_quantity_updated", {
+        product_id: product.id,
+        quantity: quantityCount + 1,
+        action: "increased",
+      });
 
       
     } else if (actionName === "minus" && quantityCount !== 1) {
       setQuantityCount(() => quantityCount - 1);
       updateCartAmount(product.id, quantityCount - 1);
       calculateTotals();
+      posthog.capture("cart_quantity_updated", {
+        product_id: product.id,
+        quantity: quantityCount - 1,
+        action: "decreased",
+      });
     }
   };
 

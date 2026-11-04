@@ -13,6 +13,7 @@
 
 import React from "react";
 import { useProductStore } from "@/app/_zustand/store";
+import posthog from "posthog-js";
 import toast from "react-hot-toast";
 
 
@@ -29,6 +30,11 @@ const AddToCartSingleProductBtn = ({ product, quantityCount } : SingleProductBtn
       amount: quantityCount
     });
     calculateTotals();
+    posthog.capture("product_added_to_cart", {
+      product_id: product?.id,
+      quantity: quantityCount,
+      unit_price: product?.price,
+    });
     toast.success("Product added to the cart");
   };
   return (
