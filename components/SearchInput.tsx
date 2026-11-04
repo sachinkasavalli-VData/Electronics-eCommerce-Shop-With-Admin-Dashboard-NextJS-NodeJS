@@ -11,6 +11,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
+import posthog from "posthog-js";
 import { sanitize } from "@/lib/sanitize";
 
 const SearchInput = () => {
@@ -22,6 +23,7 @@ const SearchInput = () => {
     e.preventDefault();
     // Sanitize the search input before using it in URL
     const sanitizedSearch = sanitize(searchInput);
+    posthog.capture("search_submitted");
     router.push(`/search?search=${encodeURIComponent(sanitizedSearch)}`);
     setSearchInput("");
   };
